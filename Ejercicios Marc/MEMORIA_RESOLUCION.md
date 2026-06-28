@@ -220,17 +220,19 @@ El capital stand-alone **asume que todos los países pierden al máximo simultá
 
 ### Paso 2 — PCA: índice sintético macroeconómico
 
-Se aplica PCA a las 4 series de cada país (estandarizadas, 34 observaciones anuales). El primer componente principal (PC1) maximiza la varianza explicada y actúa como barómetro del ciclo económico del país.
+Se aplica PCA a las series de cada país (estandarizadas, 34 observaciones anuales). El primer componente principal (PC1) maximiza la varianza explicada y actúa como barómetro del ciclo económico del país.
 
-| País | Varianza explicada PC1 |
-|---|---|
-| Brasil | 59.7% |
-| Chile | 59.8% |
-| Francia | 55.2% |
-| Italia | 37.8% |
-| Alemania | 52.9% |
+> **Hallazgo sobre los datos.** El Excel `series_macro.xlsx` **no es homogéneo**: Brasil y Chile disponen de 4 series macro (incluyen *Deposit interest rate*), mientras que Francia, Italia y Alemania solo tienen 3 (sin esa serie). Son 2×4 + 3×3 = 17 filas en total, coherente con las dimensiones de la hoja. El código detecta automáticamente cuántas series tiene cada país y aplica PCA a las disponibles, sin asumir un número fijo.
 
-El PC1 de cada país resume entre el 38% y el 60% de la variabilidad conjunta de sus 4 indicadores macroeconómicos.
+| País | Series | Varianza explicada PC1 |
+|---|:--:|---|
+| Brasil | 4 | 59.7% |
+| Chile | 4 | 59.8% |
+| Francia | 3 | 55.2% |
+| Italia | 3 | 37.8% |
+| Alemania | 3 | 52.9% |
+
+El PC1 de cada país resume entre el 38% y el 60% de la variabilidad conjunta de sus indicadores macroeconómicos.
 
 ---
 
@@ -302,10 +304,10 @@ La matriz es semidefinida positiva (todos los valores propios ≥ 0) → válida
 El beneficio de ~6.7% proviene de que los países no están todos perfectamente correlacionados. Las pérdidas máximas individuales no ocurren todas al mismo tiempo, permitiendo al banco liberar capital.
 
 **Diferencia entre cópulas:**
-La diferencia entre Gaussiana y t es pequeña en este caso (≈0.10 u.m.) debido a las correlaciones relativamente bajas entre los países (especialmente los latinoamericanos con los europeos). Si las correlaciones fuesen más altas, la cópula t produciría un capital notablemente mayor al capturar la mayor co-dependencia en las colas.
+Los capitales Gaussiano (86.03) y t-Student (85.93) salen casi idénticos en el percentil 95%, pero **esto no significa que las cópulas sean equivalentes**. El análisis de *tail dependence* lo revela: la probabilidad de que **los cinco países superen simultáneamente** $\mu+2\sigma$ es de 0.000004 con la cópula Gaussiana frente a 0.000202 con la t-Student — es decir, **~50 veces más probable** con la t. Ese riesgo de pérdidas conjuntas extremas vive *más allá* del percentil 95% (en el 99% o 99.9%), donde las dos cópulas se separarían claramente. Con correlaciones moderadas como las estimadas aquí, al 95% ambas casi coinciden, pero a niveles de confianza más altos la t exigiría notablemente más capital.
 
 **Conclusión regulatoria:**
-En general, la cópula t-Student es más prudente para modelar escenarios de estrés sistémico. El impacto depende de la estructura de correlación y de los grados de libertad elegidos (menor ν = colas más pesadas = mayor capital).
+La elección del modelo de dependencia importa tanto más cuanto **más extrema** sea la confianza exigida. La cópula Gaussiana es razonable a niveles moderados, pero **subestima el riesgo sistémico** en las colas. Por eso la regulación (Basilea III/IV) y la gestión prudente favorecen cópulas con dependencia de cola (t-Student) y niveles de confianza altos (99.9%), donde la diferencia se vuelve material. El parámetro $\nu$ controla la intensidad: a menor $\nu$, colas más pesadas y mayor capital.
 
 ---
 
